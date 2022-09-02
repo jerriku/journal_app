@@ -1,0 +1,37 @@
+@startuml
+
+title Journal App - Sequence diagram for Editing Entry
+
+actor User
+
+User -> App: edit
+
+App -> App: sanitise input
+
+App -> Server: send id and input to edit
+
+
+Server -> Server: validate sent data
+
+alt if VALID
+
+  database DB
+  Server -> DB: find id
+
+  alt if ID EXISTS
+    DB -> Server: returns true
+    Server -> Server: edit inputs in row with corresponding id
+    Server -> App: send 200 entry edited
+    App -> User: refresh users page with new data
+  else elseif ID NOT EXISTS
+    DB -> Server: returns false
+    Server -> App: send error can't find what needs to be edited
+    App -> User: tell user process wasn't made
+  end
+
+else elseif INVALID
+  Server -> App: send 400 invalid data
+  App -> User: tell user process wasn't made
+end
+
+@enduml

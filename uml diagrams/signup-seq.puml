@@ -1,0 +1,39 @@
+@startuml 
+
+title Journal App - Sequence diagram for Signing Up
+
+actor User
+
+User -> App: sign up - send input
+App -> App: validate input(email, password, name)
+
+alt if VALID
+  App -> Server: send input data
+else elseif INVALID
+  App -> User: tell user invalid input
+end
+
+Server -> Server: validate sent data
+
+alt if VALID
+
+  database DB
+  Server -> DB: find email
+
+  alt if EMAIL NOT EXISTS
+    DB -> Server: returns false
+    Server -> DB: create account
+    Server -> App: send 201 account created
+    App -> User: show that account has been created
+  else elseif EMAIL NOT EXISTS
+    DB -> Server: return true
+    Server -> App: tell app email already exists
+    App -> User: show user that account already exists
+  end
+
+else elseif INVALID
+  Server -> App: send 400 invalid input
+  App -> User: tell user invalid input
+end
+
+@enduml

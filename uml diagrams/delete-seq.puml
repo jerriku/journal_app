@@ -1,0 +1,34 @@
+@startuml
+
+title Journal App - Sequence diagram for Deleting Text
+
+actor User
+
+User -> App: delete
+
+App -> Server: send id to delete
+
+Server -> Server: validate sent data
+
+alt if VALID
+
+  database DB
+  Server -> DB: find id
+
+  alt if ID EXISTS
+    DB -> Server: returns true
+    Server -> Server: deletes row with corresponding id
+    Server -> App: send 200 entry deleted
+    App -> User: refresh users page with new data
+  else elseif ID NOT EXISTS
+    DB -> Server: returns false
+    Server -> App: send error can't find what needs to be deleted
+    App -> User: tell user process wasn't made
+  end
+
+else elseif INVALID
+  Server -> App: send 400 invalid data
+  App -> User: tell user process wasn't made
+end
+
+@enduml

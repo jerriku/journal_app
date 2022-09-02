@@ -1,0 +1,27 @@
+@startuml
+
+title Journal App - Sequence diagram for Writing/Saving Entry
+
+actor User
+
+User -> App: write
+App -> App: sanitise input
+
+App -> Server: send input data
+
+Server -> Server: validate sent data
+
+alt if VALID
+
+  database DB
+  Server -> Server: create a log of date and time
+  Server -> DB: create/save input data
+  Server -> App: send 201 entry saved
+  App -> User: refresh users page with new data
+
+else elseif INVALID
+  Server -> App: send 400 invalid input
+  App -> User: tell user invalid input
+end
+
+@enduml

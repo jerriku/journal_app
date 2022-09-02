@@ -1,0 +1,38 @@
+@startuml
+
+title Journal App - Sequence diagram for Logging Up
+
+actor User
+
+User -> App: login up - send input
+App -> App: validate input(email, password, name)
+
+alt if VALID
+  App -> Server: send input data
+else elseif INVALID
+  App -> User: tell user invalid input
+end
+
+Server -> Server: validate sent data
+
+alt if VALID
+
+  database DB
+  Server -> DB: check if inputs matches data saved
+
+  alt if EXISTS
+    DB -> Server: valid inputs
+    Server -> App: send 201 inputs correct
+    App -> User: send user to the journal page
+  else elseif NOT EXISTS
+    DB -> Server: inputs does not exist
+    Server -> App: send error inputs are incorrect
+    App -> User: tell user inputs were incorrect
+  end
+
+else elseif INVALID
+  Server -> App: send 400 invalid input
+  App -> User: tell user invalid input
+end
+
+@enduml

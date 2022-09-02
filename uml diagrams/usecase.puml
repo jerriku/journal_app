@@ -1,0 +1,24 @@
+@startuml
+
+title Journal App - Use case diagram
+left to right direction
+
+actor User as A
+
+rectangle App {
+  usecase "Sign up" as uc0
+  usecase "Login" as uc1
+  usecase "Write" as uc2
+  usecase "Delete" as uc3
+  usecase "Edit" as uc4
+  usecase "Logout" as uc5
+}
+
+A --> uc0
+A --> uc1
+A --> uc2
+A --> uc3
+A --> uc4
+A --> uc5
+
+@enduml 
