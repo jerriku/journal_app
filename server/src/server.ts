@@ -5,6 +5,8 @@ const Account = require('../dist/classes/Account');
 const Journal = require('../dist/classes/Journal');
 const { sequelize } = require('../dist/sequelize_index');
 
+sequelize.sync({ force: true });
+
 type ACCOUNT = {
     id: number,
     name: string,
@@ -25,11 +27,12 @@ const app = express();
 const { PORT } = process.env;
 const jsonMiddleware = express.json();
 
+app.use(express.urlencoded({ extended: true }));
 app.use(jsonMiddleware);
 
 app.get("/account", async (req: Request, res: Response): Promise<void> => {
     const { id }: any = req.body;
-
+    
     const account: ACCOUNT = await Account.findByPk(id);
     
     if (!account) {
@@ -41,7 +44,6 @@ app.get("/account", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.post("/account", async (req: Request, res: Response): Promise<void> => {
-    await sequelize.sync({ force: true });
     const account: any = req.body;
 
     if (!account.name || !account.email || !account.password) {
@@ -57,8 +59,18 @@ app.post("/account", async (req: Request, res: Response): Promise<void> => {
 app.patch("/account", async (req: Request, res: Response): Promise<void> => {
     const { id, name, email, password } = req.body;
 
-    if (!name && !email && !password) {
+    if (!id) {
+        res.status(400).json({error: "No id was provided"});
+        return;
+    }
+
+    if (!await Account.findByPk(id)) {
         res.sendStatus(400);
+        return;
+    }
+
+    if (!name && !email && !password) {
+        res.status(400).json({error: "No change was provided"});
         return;
     }
 
@@ -88,8 +100,18 @@ app.patch("/account", async (req: Request, res: Response): Promise<void> => {
 
 app.delete("/account", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
+    
+    if (!id) {
+        res.status(400).json({error: "No id was provided"});
+        return;
+    }
 
     if (isNaN(id)) {
+        res.sendStatus(400);
+        return;
+    }
+
+    if (!await Account.findByPk(id)) {
         res.sendStatus(400);
         return;
     }
