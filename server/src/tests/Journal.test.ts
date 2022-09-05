@@ -9,7 +9,7 @@ type JOURNAL = {
     destroy(): Function
 }
 
-describe("Journal", () => {
+describe("Journal", (): void => {
     let journal: JOURNAL;
     beforeAll(async (): Promise<void> => {
         await seq.sync({ force: true });

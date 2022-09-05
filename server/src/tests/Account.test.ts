@@ -9,7 +9,7 @@ type ACCOUNT = {
     destroy(): Function
 }
 
-describe("Account", () => {
+describe("Account", (): void => {
     let account: ACCOUNT;
     beforeAll(async (): Promise<void> => {
         await sequelize.sync({ force: true });
