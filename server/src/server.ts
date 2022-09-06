@@ -126,18 +126,29 @@ app.delete("/account", async (req: Request, res: Response): Promise<void> => {
 app.get("/journal", async (req: Request, res: Response): Promise<void> => {
     const { id }: any = req.body;
 
-    const journal: JOURNAL = await Journal.findByPk(id);
+    if (id) {
+        if (isNaN(id)) {
+            res.sendStatus(400);
+            return;
+        }
+
+        const journal: JOURNAL = await Journal.findByPk(id);
     
-    if (!journal) {
-        res.sendStatus(400);
+        if (!journal) {
+            res.sendStatus(400);
+            return;
+        }
+    
+        res.json(journal);
         return;
     }
+    
+    const entries: JOURNAL[] = await Journal.findAll();
 
-    res.json(journal);
+    res.json(entries);
 });
 
 app.post("/journal", async (req: Request, res: Response): Promise<void> => {
-    await sequelize.sync({ force: true });
     const journal: any = req.body;
 
     if (!journal.entry || !journal.date || !journal.time) {
@@ -152,6 +163,16 @@ app.post("/journal", async (req: Request, res: Response): Promise<void> => {
 
 app.patch("/journal", async (req: Request, res: Response): Promise<void> => {
     const { id, entry, date, time } = req.body;
+
+    if (!id) {
+        res.status(400).json({error: "No id was provided"});
+        return;
+    }
+
+    if (!await Journal.findByPk(id)) {
+        res.sendStatus(400);
+        return;
+    }
 
     if (!entry && !date && !time) {
         res.sendStatus(400);
@@ -185,7 +206,17 @@ app.patch("/journal", async (req: Request, res: Response): Promise<void> => {
 app.delete("/journal", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
 
+    if (!id) {
+        res.status(400).json({error: "No id was provided"});
+        return;
+    }
+
     if (isNaN(id)) {
+        res.sendStatus(400);
+        return;
+    }
+
+    if (!await Account.findByPk(id)) {
         res.sendStatus(400);
         return;
     }
