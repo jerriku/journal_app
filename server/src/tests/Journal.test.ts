@@ -1,4 +1,5 @@
 const { sequelize: seq } = require('../sequelize_index');
+//@ts-ignore
 const Journal = require('../classes/Journal');
 
 type JOURNAL = {
@@ -18,8 +19,6 @@ describe("Journal", (): void => {
     test("can create a new journal", async (): Promise<void> => {
         journal = await Journal.create({
             entry: "Hello World!",
-            date: "Sept 04 2022",
-            time: "16:12:53",
         });
 
         expect(journal.id).toBeTruthy();
@@ -27,14 +26,6 @@ describe("Journal", (): void => {
 
     test("can access entry", async (): Promise<void> => {
         expect(journal.entry).toBe("Hello World!");
-    });
-
-    test("can access date", async (): Promise<void> => {
-        expect(journal.date).toBe("Sept 04 2022");
-    });
-
-    test("can access time", async (): Promise<void> => {
-        expect(journal.time).toBe("16:12:53");
     });
 
     test("can edit journal", async (): Promise<void> => {

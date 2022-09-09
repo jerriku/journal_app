@@ -1,11 +1,14 @@
 const { sequelize } = require('../sequelize_index');
 const Account = require('../classes/Account');
+//@ts-ignore
+const Journal = require('../classes/Journal');
 
 type ACCOUNT = {
     id: number,
     name: string,
     email: string,
     password: string,
+    journals: JOURNAL[],
     destroy(): Function
 }
 
@@ -46,6 +49,24 @@ describe("Account", (): void => {
         account = await Account.findByPk(account.id);
 
         expect(account.name).toBe("J0hn W1ck");
+    });
+
+    test("has a journal", async (): Promise<void> => {
+        await Journal.create({
+            entry: "Hello World!",
+            account_id: account.id
+        });
+
+        account = await Account.findByPk(
+            account.id, 
+            { include: { 
+                model: Journal, 
+                as: "journals" } 
+            }
+        );
+        
+        expect(account.journals).toBeTruthy();
+        expect(account.journals[0].entry).toBe("Hello World!");
     });
 
     test("can delete account", async (): Promise<void> => {
