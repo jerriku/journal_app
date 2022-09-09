@@ -12,6 +12,15 @@ type ACCOUNT = {
     destroy(): Function
 }
 
+//@ts-ignore
+type JOURNAL = {
+    id: number,
+    entry: string,
+    date: string,
+    time: string,
+    destroy(): Function
+}
+
 describe("Account", (): void => {
     let account: ACCOUNT;
     beforeAll(async (): Promise<void> => {
@@ -59,7 +68,7 @@ describe("Account", (): void => {
 
         account = await Account.findByPk(
             account.id, 
-            { include: { 
+            { include: {
                 model: Journal, 
                 as: "journals" } 
             }

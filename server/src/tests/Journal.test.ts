@@ -1,7 +1,7 @@
 const { sequelize: seq } = require('../sequelize_index');
 //@ts-ignore
 const Journal = require('../classes/Journal');
-
+//@ts-ignore
 type JOURNAL = {
     id: number,
     entry: string,

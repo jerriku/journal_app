@@ -151,21 +151,26 @@ app.get("/journal", async (req: Request, res: Response): Promise<void> => {
 app.post("/journal", async (req: Request, res: Response): Promise<void> => {
     const journal: any = req.body;
 
-    if (!journal.entry || !journal.date || !journal.time) {
+    if (!journal.entry || !journal.account_id) {
         res.sendStatus(400);
         return;
     }
-
+    
     await Journal.create(journal);
-
+    
     res.sendStatus(201);
 });
 
-app.patch("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id, entry, date, time } = req.body;
+app.put("/journal", async (req: Request, res: Response): Promise<void> => {
+    const { id, entry } = req.body;
 
     if (!id) {
         res.status(400).json({error: "No id was provided"});
+        return;
+    }
+
+    if (!entry) {
+        res.sendStatus(400);
         return;
     }
 
@@ -174,31 +179,10 @@ app.patch("/journal", async (req: Request, res: Response): Promise<void> => {
         return;
     }
 
-    if (!entry && !date && !time) {
-        res.sendStatus(400);
-        return;
-    }
-
-    if (entry) {
-        await Journal.update(
-            { entry },
-            { where: { id } }
-        );
-    }
-
-    if (date) {
-        await Journal.update(
-            { date },
-            { where: { id } }
-        );
-    }
-
-    if (time) {
-        await Journal.update(
-            { time },
-            { where: { id } }
-        );
-    }
+    await Journal.update(
+        { entry },
+        { where: { id } }
+    );
 
     res.sendStatus(201);
 });

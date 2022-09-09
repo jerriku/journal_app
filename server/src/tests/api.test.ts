@@ -38,16 +38,10 @@ describe("API", (): void => {
         expect(response.status).toBe(201);
     });
 
-    test("can DELETE on account endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).delete("/account").send({ id: "1" });
-        expect(response.status).toBe(200);
-    });
-
     test("can POST journal endpoint", async (): Promise<void> => {
         const response: any = await request(baseURL).post("/journal").send({
             entry: "Hello World!",
-            date: "Aug 21 2022",
-            time: "03:41:53",
+            account_id: 1
         });
 
         expect(response.status).toBe(201);
@@ -61,23 +55,18 @@ describe("API", (): void => {
         expect(data.entry).toBe("Hello World!");
     });
 
-    test("can PATCH entry on journal endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).patch("/journal").send({ id: 1, entry: "H3ll0 W0rld!" });
-        expect(response.status).toBe(201);
-    });
-
-    test("can PATCH date on journal endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).patch("/journal").send({ id: 1, date: "Sept 04 2022" });
-        expect(response.status).toBe(201);
-    });
-
-    test("can PATCH time on journal endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).patch("/journal").send({ id: 1, time: "16:12:53" });
+    test("can PUT entry on journal endpoint", async(): Promise<void> => {
+        const response: any = await request(baseURL).put("/journal").send({ id: 1, entry: "H3ll0 W0rld!" });
         expect(response.status).toBe(201);
     });
 
     test("can DELETE on journal endpoint", async(): Promise<void> => {
         const response: any = await request(baseURL).delete("/journal").send({ id: "1" });
+        expect(response.status).toBe(200);
+    });
+
+    test("can DELETE on account endpoint", async(): Promise<void> => {
+        const response: any = await request(baseURL).delete("/account").send({ id: "1" });
         expect(response.status).toBe(200);
     });
 });
