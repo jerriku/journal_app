@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 require('dotenv').config();
+const cors = require('cors');
 const express = require('express');
 const Account = require('../dist/classes/Account');
 const Journal = require('../dist/classes/Journal');
@@ -27,6 +28,10 @@ const app = express();
 const { PORT } = process.env;
 const jsonMiddleware = express.json();
 
+app.use(cors({
+    origin: "http://localhost:7764",
+    credentials: true,
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(jsonMiddleware);
 
