@@ -48,7 +48,31 @@ app.get("/account", async (req: Request, res: Response): Promise<void> => {
     res.json(account);
 });
 
-app.post("/account", async (req: Request, res: Response): Promise<void> => {
+app.post("/account/login", async (req: Request, res: Response): Promise<void> => {
+    const {email, password}: any = req.body;
+
+    if (!email || !password) {
+        res.sendStatus(400);
+        return;
+    }
+
+    const accounts: ACCOUNT[] = await Account.findAll({where: { email }});
+    const account: ACCOUNT = accounts[0];
+    
+    if (!account) {
+        res.status(401).json({Error: "InvalidCredentails"});
+        return;
+    }
+
+    if (account.password === password) {
+        res.sendStatus(200);
+        return;
+    }
+
+    res.status(401).json({Error: "InvalidCredentails"});
+});
+
+app.post("/account/register", async (req: Request, res: Response): Promise<void> => {
     const account: any = req.body;
 
     if (!account.name || !account.email || !account.password) {

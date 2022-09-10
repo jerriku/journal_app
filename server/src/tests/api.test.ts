@@ -6,13 +6,22 @@ const baseURL: string = `http://localhost:${PORT}`;
 
 describe("API", (): void => {
     test("can POST account endpoint", async (): Promise<void> => {
-        const response: any = await request(baseURL).post("/account").send({
+        const response: any = await request(baseURL).post("/account/register").send({
             name: "J0hn Wick",
             email: "john_wick@gmail.com",
             password: "encrypted_password123"
         });
 
         expect(response.status).toBe(201);
+    });
+
+    test("can login with POST account endpoint", async (): Promise<void> => {
+        const response: any = await request(baseURL).post("/account/login").send({
+            email: "john_wick@gmail.com",
+            password: "encrypted_password123"
+        });
+
+        expect(response.status).toBe(200);
     });
 
     test("can GET account endpoint", async (): Promise<void> => {
