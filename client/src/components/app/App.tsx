@@ -1,7 +1,9 @@
+import Access from "../access/Access";
+
 function App() {
     return (
         <div className="app">
-            Hello World!
+            <Access />
         </div>
     )
 }
