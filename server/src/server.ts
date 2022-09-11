@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 require('dotenv').config();
 const cors = require('cors');
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const Account = require('../dist/classes/Account');
 const Journal = require('../dist/classes/Journal');
 const { sequelize } = require('../dist/sequelize_index');
@@ -25,7 +26,7 @@ type JOURNAL = {
 }
 
 const app = express();
-const { PORT } = process.env;
+const { PORT, JWT_KEY } = process.env;
 const jsonMiddleware = express.json();
 
 app.use(cors({
@@ -36,17 +37,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use(jsonMiddleware);
 
 app.get("/account", async (req: Request, res: Response): Promise<void> => {
-    const { id }: any = req.body;
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
 
-    if (!id || isNaN(id)) {
-        res.status(400).json({ Error: "No id was provided" });
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
+        return;
+    }
+
+    let id: number = 0;
+
+    try {
+        const decodedData: any = jwt.verify(session, JWT_KEY);
+        id = decodedData.id;
+    } catch {
+        res.sendStatus(400);
         return;
     }
     
     const account: ACCOUNT = await Account.findByPk(id);
     
     if (!account) {
-        res.sendStatus(400);
+        res.status(400).json({ Error: "InvalidSession" });
         return;
     }
 
@@ -69,12 +80,16 @@ app.post("/account/login", async (req: Request, res: Response): Promise<void> =>
         return;
     }
 
-    if (account.password === password) {
-        res.sendStatus(200);
-        return;
+    if (account.password !== password) {
+        res.status(401).json({ Error: "InvalidCredentails" });
     }
 
-    res.status(401).json({ Error: "InvalidCredentails" });
+    const id: number = account.id;
+    const exp: number = Math.floor(Date.now() / 1000) + 60 * 60;
+    const session: string = jwt.sign({ id, exp }, JWT_KEY);
+
+    res.status(200).json({ session });
+    return;
 });
 
 app.post("/account/register", async (req: Request, res: Response): Promise<void> => {
