@@ -180,8 +180,8 @@ app.delete("/account", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.get("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id, account_id }: any = req.body;
-
+    const { id, account_id }: any = req.query;
+    
     if (!account_id || isNaN(account_id)) {
         res.sendStatus(400);
         return;

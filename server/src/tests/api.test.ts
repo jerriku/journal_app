@@ -76,7 +76,7 @@ describe("API", (): void => {
     });
 
     test("can GET journal endpoint", async (): Promise<void> => {
-        const response: any = await request(baseURL).get("/journal").send({ id: 1, account_id: 1 });
+        const response: any = await request(baseURL).get("/journal").query({ id: 1, account_id: 1 });
         expect(response.status).toBe(200);
 
         const data: any = JSON.parse(response.text);
