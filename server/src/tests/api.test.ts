@@ -69,7 +69,7 @@ describe("API", (): void => {
     });
 
     test("can GET journal endpoint", async (): Promise<void> => {
-        const response: any = await request(baseURL).get("/journal").send({ id: 1 });
+        const response: any = await request(baseURL).get("/journal").send({ id: 1, account_id: 1 });
         expect(response.status).toBe(200);
 
         const data: any = JSON.parse(response.text);
@@ -77,17 +77,17 @@ describe("API", (): void => {
     });
 
     test("can PUT entry on journal endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).put("/journal").send({ id: 1, entry: "H3ll0 W0rld!" });
+        const response: any = await request(baseURL).put("/journal").send({ id: 1, entry: "H3ll0 W0rld!", account_id: 1 });
         expect(response.status).toBe(201);
     });
 
     test("can DELETE on journal endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).delete("/journal").send({ id: "1" });
+        const response: any = await request(baseURL).delete("/journal").send({ id: "1", account_id: 1 });
         expect(response.status).toBe(200);
     });
 
     test("can DELETE on account endpoint", async(): Promise<void> => {
-        const response: any = await request(baseURL).delete("/account").send({ id: "1" });
+        const response: any = await request(baseURL).delete("/account").send({ id: "1", account_id: 1 });
         expect(response.status).toBe(200);
     });
 });

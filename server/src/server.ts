@@ -37,6 +37,11 @@ app.use(jsonMiddleware);
 
 app.get("/account", async (req: Request, res: Response): Promise<void> => {
     const { id }: any = req.body;
+
+    if (!id || isNaN(id)) {
+        res.status(400).json({ Error: "No id was provided" });
+        return;
+    }
     
     const account: ACCOUNT = await Account.findByPk(id);
     
@@ -100,7 +105,7 @@ app.post("/account/register", async (req: Request, res: Response): Promise<void>
 app.patch("/account", async (req: Request, res: Response): Promise<void> => {
     const { id, name, email, password } = req.body;
 
-    if (!id) {
+    if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
         return;
     }
@@ -142,13 +147,8 @@ app.patch("/account", async (req: Request, res: Response): Promise<void> => {
 app.delete("/account", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
     
-    if (!id) {
+    if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
-        return;
-    }
-
-    if (isNaN(id)) {
-        res.sendStatus(400);
         return;
     }
 
@@ -165,7 +165,12 @@ app.delete("/account", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.get("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id }: any = req.body;
+    const { id, account_id }: any = req.body;
+
+    if (!account_id || isNaN(account_id)) {
+        res.sendStatus(400);
+        return;
+    }
 
     if (id) {
         if (isNaN(id)) {
@@ -173,7 +178,7 @@ app.get("/journal", async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const journal: JOURNAL = await Journal.findByPk(id);
+        const journal: JOURNAL = await Journal.findByPk(id, { where: { account_id } });
     
         if (!journal) {
             res.sendStatus(400);
@@ -184,33 +189,36 @@ app.get("/journal", async (req: Request, res: Response): Promise<void> => {
         return;
     }
     
-    const entries: JOURNAL[] = await Journal.findAll();
+    const entries: JOURNAL[] = await Journal.findAll({ where: { account_id } });
 
     res.json(entries);
 });
 
 app.post("/journal", async (req: Request, res: Response): Promise<void> => {
-    const journal: any = req.body;
+    const { entry, account_id }: any = req.body;
 
-    if (!journal.entry || !journal.account_id) {
+    if (!entry || !account_id || isNaN(account_id)) {
         res.sendStatus(400);
         return;
     }
     
-    await Journal.create(journal);
+    await Journal.create({
+        entry,
+        account_id
+    });
     
     res.sendStatus(201);
 });
 
 app.put("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id, entry } = req.body;
+    const { id, entry, account_id } = req.body;
 
     if (!id) {
         res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
-    if (!entry) {
+    if (!entry || !account_id || isNaN(account_id)) {
         res.sendStatus(400);
         return;
     }
@@ -229,24 +237,24 @@ app.put("/journal", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.delete("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.body;
+    const { id, account_id } = req.body;
 
-    if (!id) {
+    if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
-    if (isNaN(id)) {
+    if (!account_id || isNaN(account_id)) {
+        res.status(400).json({ Error: "No id was provided" });
+        return;
+    }
+    
+    const journal: JOURNAL = await Journal.findByPk(id, { where: { account_id } });
+
+    if (!journal) {
         res.sendStatus(400);
         return;
     }
-
-    if (!await Account.findByPk(id)) {
-        res.sendStatus(400);
-        return;
-    }
-
-    const journal: JOURNAL = await Journal.findByPk(id);
 
     journal.destroy();
 
