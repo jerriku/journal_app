@@ -5,6 +5,8 @@ const { PORT } = process.env;
 const baseURL: string = `http://localhost:${PORT}`;
 
 describe("API", (): void => {
+    let session: string;
+
     test("can POST account endpoint", async (): Promise<void> => {
         const response: any = await request(baseURL).post("/account/register").send({
             name: "J0hn Wick",
@@ -33,11 +35,16 @@ describe("API", (): void => {
             password: "encrypted_password123"
         });
 
+        session = response._body.session;
+
+        expect(session).toBeTruthy();
         expect(response.status).toBe(200);
     });
 
     test("can GET account endpoint", async (): Promise<void> => {
-        const response: any = await request(baseURL).get("/account").send({ id: 1 });
+        const response: any = await request(baseURL).get("/account").set(
+            "Authorization", `Bearer ${session}`
+        );
         expect(response.status).toBe(200);
 
         const data: any = JSON.parse(response.text);
