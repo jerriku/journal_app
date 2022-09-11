@@ -100,7 +100,7 @@ app.post("/account/register", async (req: Request, res: Response): Promise<void>
 app.patch("/account", async (req: Request, res: Response): Promise<void> => {
     const { id, name, email, password } = req.body;
 
-    if (!id) {
+    if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
         return;
     }
@@ -142,13 +142,8 @@ app.patch("/account", async (req: Request, res: Response): Promise<void> => {
 app.delete("/account", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
     
-    if (!id) {
+    if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
-        return;
-    }
-
-    if (isNaN(id)) {
-        res.sendStatus(400);
         return;
     }
 
@@ -165,7 +160,12 @@ app.delete("/account", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.get("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id }: any = req.body;
+    const { id, account_id }: any = req.body;
+
+    if (!account_id || isNaN(account_id)) {
+        res.sendStatus(400);
+        return;
+    }
 
     if (id) {
         if (isNaN(id)) {
@@ -192,7 +192,7 @@ app.get("/journal", async (req: Request, res: Response): Promise<void> => {
 app.post("/journal", async (req: Request, res: Response): Promise<void> => {
     const journal: any = req.body;
 
-    if (!journal.entry || !journal.account_id) {
+    if (!journal.entry || !journal.account_id || isNaN(journal.account_id)) {
         res.sendStatus(400);
         return;
     }
@@ -231,13 +231,8 @@ app.put("/journal", async (req: Request, res: Response): Promise<void> => {
 app.delete("/journal", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
 
-    if (!id) {
+    if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
-        return;
-    }
-
-    if (isNaN(id)) {
-        res.sendStatus(400);
         return;
     }
 
