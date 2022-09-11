@@ -15,6 +15,18 @@ describe("API", (): void => {
         expect(response.status).toBe(201);
     });
 
+    test("can deny register if email already exist with POST account endpoint", async (): Promise<void> => {
+        const response: any = await request(baseURL).post("/account/register").send({
+            name: "J0hn Wick",
+            email: "john_wick@gmail.com",
+            password: "encrypted_password123"
+        });
+
+        const error: string = JSON.parse(response.error.text)["Error"];
+        expect(response.status).toBe(400);
+        expect(error).toBe("Account already exists");
+    });
+
     test("can login with POST account endpoint", async (): Promise<void> => {
         const response: any = await request(baseURL).post("/account/login").send({
             email: "john_wick@gmail.com",
