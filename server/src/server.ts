@@ -49,7 +49,7 @@ app.get("/account", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.post("/account/login", async (req: Request, res: Response): Promise<void> => {
-    const {email, password}: any = req.body;
+    const { email, password }: any = req.body;
 
     if (!email || !password) {
         res.sendStatus(400);
@@ -60,7 +60,7 @@ app.post("/account/login", async (req: Request, res: Response): Promise<void> =>
     const account: ACCOUNT = accounts[0];
     
     if (!account) {
-        res.status(401).json({Error: "InvalidCredentails"});
+        res.status(401).json({ Error: "InvalidCredentails" });
         return;
     }
 
@@ -69,18 +69,30 @@ app.post("/account/login", async (req: Request, res: Response): Promise<void> =>
         return;
     }
 
-    res.status(401).json({Error: "InvalidCredentails"});
+    res.status(401).json({ Error: "InvalidCredentails" });
 });
 
 app.post("/account/register", async (req: Request, res: Response): Promise<void> => {
-    const account: any = req.body;
+    const { name, email, password } = req.body;
 
-    if (!account.name || !account.email || !account.password) {
+    if (!name || !email || !password) {
         res.sendStatus(400);
         return;
     }
 
-    await Account.create(account);
+    const accounts: ACCOUNT[] = await Account.findAll({where: { email }});
+    const account: ACCOUNT = accounts[0];
+    
+    if (account) {
+        res.status(400).json({ Error: "Account already exists" });
+        return;
+    }
+
+    await Account.create({
+        name,
+        email,
+        password
+    });
 
     res.sendStatus(201);
 });
@@ -89,7 +101,7 @@ app.patch("/account", async (req: Request, res: Response): Promise<void> => {
     const { id, name, email, password } = req.body;
 
     if (!id) {
-        res.status(400).json({error: "No id was provided"});
+        res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
@@ -99,7 +111,7 @@ app.patch("/account", async (req: Request, res: Response): Promise<void> => {
     }
 
     if (!name && !email && !password) {
-        res.status(400).json({error: "No change was provided"});
+        res.status(400).json({ Error: "No change was provided" });
         return;
     }
 
@@ -131,7 +143,7 @@ app.delete("/account", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
     
     if (!id) {
-        res.status(400).json({error: "No id was provided"});
+        res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
@@ -194,7 +206,7 @@ app.put("/journal", async (req: Request, res: Response): Promise<void> => {
     const { id, entry } = req.body;
 
     if (!id) {
-        res.status(400).json({error: "No id was provided"});
+        res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
@@ -220,7 +232,7 @@ app.delete("/journal", async (req: Request, res: Response): Promise<void> => {
     const { id } = req.body;
 
     if (!id) {
-        res.status(400).json({error: "No id was provided"});
+        res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
