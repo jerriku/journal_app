@@ -5,12 +5,11 @@ function Login() {
     const [pass, setPass] = useState("");
     const [email, setEmail] = useState("");
 
-    const handleError = (err: Error) => {
+    const handleError = (err: Error): void => {
         console.error(err);
     }
 
-    const handleSubmitLogin = () => {
-        console.log(email, pass);
+    const handleSubmitLogin = (): void => {
         axios
         .post(`http://localhost:9041/account/login`, {email, password: pass})
         .then((res) => {
