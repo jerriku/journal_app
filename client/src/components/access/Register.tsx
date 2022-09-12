@@ -6,6 +6,10 @@ function Register() {
     const [pass, setPass] = useState("");
     const [email, setEmail] = useState("");
 
+    const handleError = (err: Error) => {
+        console.error(err);
+    }
+
     const handleSubmitRegister = (e: any) => {
         console.log(e.target);
         console.log(name, email, pass);
@@ -15,9 +19,7 @@ function Register() {
             console.log(data);
             window.location.reload();
         })
-        .catch((err) => {
-            console.log(err);
-        })
+        .catch(handleError);
     }
 
     return (

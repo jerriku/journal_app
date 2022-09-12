@@ -5,17 +5,19 @@ function Login() {
     const [pass, setPass] = useState("");
     const [email, setEmail] = useState("");
 
+    const handleError = (err: Error) => {
+        console.error(err);
+    }
+
     const handleSubmitLogin = () => {
         console.log(email, pass);
         axios
         .post(`http://localhost:9041/account/login`, {email, password: pass})
-        .then((data) => {
-            console.log(data);
+        .then((res) => {
+            localStorage.setItem("session", res.data.session);
             document.location = "/home";
         })
-        .catch((err) => {
-            console.log(err);
-        });
+        .catch(handleError);
     }
 
     return (
