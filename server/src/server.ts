@@ -17,6 +17,12 @@ type ACCOUNT = {
     destroy(): Function
 }
 
+type SESSION = {
+    id: number,
+    exp: number,
+    iat: number,
+}
+
 type JOURNAL = {
     id: number,
     entry: string,
@@ -28,6 +34,15 @@ type JOURNAL = {
 const app = express();
 const { PORT, JWT_KEY } = process.env;
 const jsonMiddleware = express.json();
+
+function verifySession(session: string): number {
+    try {
+        const decodedData: SESSION = jwt.verify(session, JWT_KEY);
+        return decodedData.id;
+    } catch {
+        return -1;
+    }
+}
 
 app.use(cors({
     origin: "http://localhost:7764",
@@ -44,15 +59,7 @@ app.get("/account", async (req: Request, res: Response): Promise<void> => {
         return;
     }
 
-    let id: number = 0;
-
-    try {
-        const decodedData: any = jwt.verify(session, JWT_KEY);
-        id = decodedData.id;
-    } catch {
-        res.sendStatus(400);
-        return;
-    }
+    const id: number = verifySession(session);
     
     const account: ACCOUNT = await Account.findByPk(id);
     
@@ -118,20 +125,23 @@ app.post("/account/register", async (req: Request, res: Response): Promise<void>
 });
 
 app.patch("/account", async (req: Request, res: Response): Promise<void> => {
-    const { id, name, email, password } = req.body;
+    const { name, email, password } = req.body;
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
 
-    if (!id || isNaN(id)) {
-        res.status(400).json({ Error: "No id was provided" });
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
         return;
     }
 
+    const id: number = verifySession(session);
+
     if (!await Account.findByPk(id)) {
-        res.sendStatus(400);
+        res.sendStatus(400).json({ Error: "InvalidSession" });;
         return;
     }
 
     if (!name && !email && !password) {
-        res.status(400).json({ Error: "No change was provided" });
+        res.status(400).json({ Error: "ChangeNotFound" });
         return;
     }
 
@@ -160,30 +170,38 @@ app.patch("/account", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.delete("/account", async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.body;
-    
-    if (!id || isNaN(id)) {
-        res.status(400).json({ Error: "No id was provided" });
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
+
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
         return;
     }
 
-    if (!await Account.findByPk(id)) {
-        res.sendStatus(400);
-        return;
-    }
-
+    const id: number = verifySession(session);
     const account: ACCOUNT = await Account.findByPk(id);
 
-    account.destroy();
+    if (!account) {
+        res.status(400).json({ Error: "InvalidSession" });
+        return;
+    }
 
+    account.destroy();
     res.sendStatus(200);
 });
 
 app.get("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id, account_id }: any = req.body;
+    const { id }: any = req.query;
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
 
-    if (!account_id || isNaN(account_id)) {
-        res.sendStatus(400);
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
+        return;
+    }
+
+    const account_id: number = verifySession(session);
+    
+    if (account_id < 0) {
+        res.status(400).json({ Error: "InvalidSession" });
         return;
     }
 
@@ -210,9 +228,17 @@ app.get("/journal", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.post("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { entry, account_id }: any = req.body;
+    const { entry }: any = req.body;
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
 
-    if (!entry || !account_id || isNaN(account_id)) {
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
+        return;
+    }
+
+    const account_id: number = verifySession(session);
+
+    if (!entry || account_id < 0) {
         res.sendStatus(400);
         return;
     }
@@ -226,15 +252,28 @@ app.post("/journal", async (req: Request, res: Response): Promise<void> => {
 });
 
 app.put("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id, entry, account_id } = req.body;
+    const { id, entry } = req.body;
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
 
     if (!id) {
         res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
-    if (!entry || !account_id || isNaN(account_id)) {
-        res.sendStatus(400);
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
+        return;
+    }
+
+    const account_id: number = verifySession(session);
+
+    if (account_id < 0) {
+        res.status(400).json({ Error: "InvalidSession" });
+        return;
+    }
+
+    if (!entry) {
+        res.status(400).json({ Error: "ChangeNotFound" });
         return;
     }
 
@@ -245,22 +284,30 @@ app.put("/journal", async (req: Request, res: Response): Promise<void> => {
 
     await Journal.update(
         { entry },
-        { where: { id } }
+        { where: { id, account_id } }
     );
 
     res.sendStatus(201);
 });
 
 app.delete("/journal", async (req: Request, res: Response): Promise<void> => {
-    const { id, account_id } = req.body;
+    const { id } = req.body;
+    const [type, session]: string[] = req.get("Authorization")!.split(" ");
 
     if (!id || isNaN(id)) {
         res.status(400).json({ Error: "No id was provided" });
         return;
     }
 
-    if (!account_id || isNaN(account_id)) {
-        res.status(400).json({ Error: "No id was provided" });
+    if (type !== "Bearer" || !session) {
+        res.status(400).json({ Error: "SessionNotFound" });
+        return;
+    }
+
+    const account_id: number = verifySession(session);
+
+    if (account_id < 0) {
+        res.status(400).json({ Error: "InvalidSession" });
         return;
     }
     
