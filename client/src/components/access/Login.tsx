@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from 'axios';
 
-function Login() {
+function Login({ isEmail }: any) {
     const [pass, setPass] = useState("");
     const [email, setEmail] = useState("");
 
@@ -9,7 +9,22 @@ function Login() {
         console.error(err);
     }
 
+    const handleValidation = (pass: string, email: string): boolean => {
+        if (!pass || !email) return false;
+        return true;
+    }
+
     const handleSubmitLogin = (): void => {
+        const valid = handleValidation(pass, email);
+        if (!valid) {
+            alert("inputs invalid");
+            return;
+        }
+        if (!isEmail(email)) {
+            alert("invalid email address");
+            return;
+        }
+
         axios
         .post(`http://localhost:9041/account/login`, {email, password: pass})
         .then((res) => {
@@ -20,7 +35,7 @@ function Login() {
     }
 
     return (
-        <div className="sign-in">
+        <form className="sign-in">
             <h1>Sign in to Journal</h1>
             <input 
                 type="email" 
@@ -34,10 +49,15 @@ function Login() {
                 required 
                 onChange={(e) => setPass(e.target.value)} 
             /> <br />
-            <button onClick={handleSubmitLogin}>
+            <input 
+                type="button" 
+                value="Sign in" 
+                onClick={handleSubmitLogin} 
+            />
+            {/* <button onClick={handleSubmitLogin}>
                 Sign in
-            </button>
-        </div>
+            </button> */}
+        </form>
     );
 }
 
