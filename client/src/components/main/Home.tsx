@@ -12,30 +12,10 @@ type JOURNAL = {
 
 function Home() {
     const [journals, setJournals] = useState([]);
-    const [update, setUpdate] = useState(false);
-    const [id, setId] = useState(0);
 
     const handleError = (err: Error): void => {
         console.error(err);
     }
-
-    useEffect(() => {
-        const session = localStorage.getItem("session");
-
-        if (!session) {
-            alert("no available session");
-            return;
-        }
-
-        axios
-        .get(`http://localhost:9041/account`, {
-            headers: { Authorization: `Bearer ${session}` }
-        })
-        .then((res) => {
-            setId(res.data.id);
-        })
-        .catch(handleError);
-    }, [update]);
 
     useEffect(() => {
         const session = localStorage.getItem("session");
@@ -53,7 +33,7 @@ function Home() {
             console.log(journals);
         })
         .catch(handleError);
-    }, [id]);
+    }, []);
 
     return (
         <>
@@ -70,6 +50,8 @@ function Home() {
                 />
             )
         })}
+        <button>Edit</button>
+        <button>Delete</button>
         </div>
         </>
     );
