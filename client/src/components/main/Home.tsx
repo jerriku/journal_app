@@ -24,6 +24,7 @@ function Home() {
             alert("no available session");
             return;
         }
+
         axios
         .get(`http://localhost:9041/journal`, {
             headers: { Authorization: `Bearer ${session}` }
@@ -50,8 +51,6 @@ function Home() {
                 />
             )
         })}
-        <button>Edit</button>
-        <button>Delete</button>
         </div>
         </>
     );
